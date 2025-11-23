@@ -33,12 +33,12 @@ if args.dataset in ["FashionMNIST", "MNIST"]:
     image_size = 784
     num_classes = 10
     input_channels = 1
-elif args.dataset.startswith("CIFAR10"):
-    image_size = 3 * 32 * 32
-    num_classes = 10
 elif args.dataset.startswith("CIFAR100"):
     image_size = 3 * 32 * 32
     num_classes = 100
+elif args.dataset.startswith("CIFAR10"):
+    image_size = 3 * 32 * 32
+    num_classes = 10
 SEED = 42
 torch.manual_seed(SEED)
 np.random.seed(SEED)
