@@ -242,6 +242,10 @@ if args.shared_model == "LeNet":
         net.apply(weights_init)
         criterion = cross_entropy_for_onehot
         g_model = LeNet_CIFAR100().to("cuda")
+else:
+    raise ValueError(
+        f"Unsupported shared_model '{args.shared_model}'. Only 'LeNet' is currently implemented."
+    )
 
 model_size = 0
 for i, parameters in enumerate(net.parameters()):
