@@ -502,12 +502,35 @@ optimizer_full = torch.optim.Adam(full_net.parameters(), lr=0.001)
 
 optimizer_unlearned = torch.optim.Adam(unlearned_net.parameters(), lr=0.001)
 
-full_model_path = "./fgi/federated_weight/resnet20/CIFAR100/CIFAR100_sample_efficient_fedavg_federated_full_round_20_partial.pth"
+aggregation = "fedavg"
+model_dir_candidates = [
+    os.path.join("fgi", "federated_weight", args.shared_model),
+    os.path.join("fgi", "federated_weight", args.shared_model.lower()),
+]
+
+full_model_name = f"{args.dataset}_{args.type}_{args.unlearning}_{aggregation}_federated_full_round_20_partial.pth"
+unlearned_model_name = f"{args.dataset}_{args.type}_{args.unlearning}_{aggregation}_federated_unlearned_round_20_partial.pth"
+
+full_model_path = None
+unlearned_model_path = None
+for candidate_dir in model_dir_candidates:
+    candidate_full = os.path.join(candidate_dir, full_model_name)
+    candidate_unlearned = os.path.join(candidate_dir, unlearned_model_name)
+    if os.path.exists(candidate_full) and os.path.exists(candidate_unlearned):
+        full_model_path = candidate_full
+        unlearned_model_path = candidate_unlearned
+        break
+
+if full_model_path is None or unlearned_model_path is None:
+    expected_dirs = " or ".join(model_dir_candidates)
+    raise FileNotFoundError(
+        f"Pretrained federated models not found. Expected '{full_model_name}' and '{unlearned_model_name}' inside {expected_dirs}. "
+        "Generate them first using training.py (e.g., `python training.py --model lenet --dataset CIFAR10 --type sample --unlearning retrain --aggregation fedavg`)."
+    )
+
 print(f"Found existing full model at '{full_model_path}', loading weights...")
 full_net.load_state_dict(torch.load(full_model_path))
 
-
-unlearned_model_path = "./fgi/federated_weight/resnet20/CIFAR100/CIFAR100_sample_efficient_fedavg_federated_unlearned_round_20_partial.pth"
 print(f"Found existing unlearned model at '{unlearned_model_path}', loading weights...")
 unlearned_net.load_state_dict(torch.load(unlearned_model_path))
 
