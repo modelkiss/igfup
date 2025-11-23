@@ -244,6 +244,11 @@ if args.trainset == "full":
 else:
     checkpoint_name = f"data/{args.dataset}_{args.shared_model}_{args.trainset}_grad_to_img.pl"
 
+# Ensure the directory for the checkpoint exists before saving
+checkpoint_dir = os.path.dirname(checkpoint_name)
+if checkpoint_dir:
+    os.makedirs(checkpoint_dir, exist_ok=True)
+
 print("generating dataset...")
 if args.dataset == "MNIST":
         transform = transforms.Compose([
@@ -664,7 +669,12 @@ if args.trainset == "full":
     checkpoint_name = f"checkpoint/{args.dataset}_{args.shared_model}_{args.unlearning}_{args.leak_mode}_{args.lr}_{args.epochs}_{args.batch_size}.pt"
 else:
     checkpoint_name = f"checkpoint/{args.dataset}_{args.trainset}_{args.shared_model}_{args.unlearning}_{args.leak_mode}_{args.lr}_{args.epochs}_{args.batch_size}.pt"
-    
+
+# Ensure the checkpoint directory exists before reading or writing
+checkpoint_dir = os.path.dirname(checkpoint_name)
+if checkpoint_dir:
+    os.makedirs(checkpoint_dir, exist_ok=True)
+
 if os.path.exists(checkpoint_name):
     checkpoint = torch.load(checkpoint_name)
     print("checkpoint exists!")
@@ -711,11 +721,6 @@ checkpoint["best_test_loss"] = best_test_loss
 checkpoint["best_state_dict"] = best_state_dict
 checkpoint["reconstructed_imgs"] = reconstructed_imgs
 checkpoint["gt_data"] = gt_data
-
-import os
-
-# Create the 'checkpoint' directory if it doesn't exist
-os.makedirs("checkpoint", exist_ok=True)
 
 if args.trainset == "full":
     torch.save(checkpoint, f"checkpoint/{args.dataset}_{args.unlearning}_{args.type}_{args.model}_{args.leak_mode}_{args.state}_{args.lr}_{args.epochs}_{args.batch_size}.pt")
