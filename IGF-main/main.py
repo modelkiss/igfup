@@ -20,7 +20,7 @@ from scipy.optimize import linear_sum_assignment
 from scipy.fftpack import dct, idct
 from scipy import stats
 from utils_com.utils import label_to_onehot, cross_entropy_for_onehot
-from models.vision import LeNetMnist, weights_init, LeNet, LeNet_CIFAR100
+from models.vision import ConvNet, LeNetMnist, weights_init, LeNet, LeNet_CIFAR100
 from models.resnet import resnet20
 from utils_com.logger import set_logger
 import random
@@ -242,9 +242,16 @@ if args.shared_model == "LeNet":
         net.apply(weights_init)
         criterion = cross_entropy_for_onehot
         g_model = LeNet_CIFAR100().to("cuda")
+elif args.shared_model == "ConvNet":
+    net = ConvNet(num_classes).to("cuda")
+    compress_rate = 1.0
+    torch.manual_seed(1234)
+    net.apply(weights_init)
+    criterion = cross_entropy_for_onehot
+    g_model = ConvNet(num_classes).to("cuda")
 else:
     raise ValueError(
-        f"Unsupported shared_model '{args.shared_model}'. Only 'LeNet' is currently implemented."
+        f"Unsupported shared_model '{args.shared_model}'. Supported options are 'LeNet' and 'ConvNet'."
     )
 
 model_size = 0
