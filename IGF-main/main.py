@@ -8,6 +8,7 @@ os.environ['KMP_WARNINGS'] = '0'
 # import cPickle as pickle
 import pickle
 import joblib
+from pathlib import Path
 from pytorch_msssim import ssim
 import torch
 import torch.nn as nn
@@ -27,6 +28,22 @@ import lpips
 import matplotlib.pyplot as plt
 from utils_com.defense import *
 from utils_com.federated import *
+
+
+def save_reconstructed_images(reconstructed_imgs, checkpoint_path):
+    """Save reconstructed images from a checkpoint to disk."""
+    if reconstructed_imgs is None:
+        return
+
+    output_dir = Path("reconstructed_images") / Path(checkpoint_path).stem
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    imgs = reconstructed_imgs.detach().cpu()
+    if imgs.dim() == 3:
+        imgs = imgs.unsqueeze(0)
+
+    for idx, img in enumerate(imgs):
+        torchvision.utils.save_image(img.clamp(0, 1), output_dir / f"reconstruction_{idx}.png")
 
 
 parser = argparse.ArgumentParser(description='Deep Leakage from Gradients.')
@@ -677,6 +694,7 @@ if checkpoint_dir:
 
 if os.path.exists(checkpoint_name):
     checkpoint = torch.load(checkpoint_name)
+    save_reconstructed_images(checkpoint.get("reconstructed_imgs"), checkpoint_name)
     print("checkpoint exists!")
     print(checkpoint["test_loss"], checkpoint["best_test_loss"])
     exit()
