@@ -556,9 +556,30 @@ for candidate_dir in model_dir_candidates:
 
 if full_model_path is None or unlearned_model_path is None:
     expected_dirs = " or ".join(model_dir_candidates)
+    training_model_map = {"LeNet": "lenet", "ConvNet": "convnet"}
+    supported_training_models = {"lenet", "lenetmnist", "resnet20", "mnist_resnet20"}
+    training_model_arg = training_model_map.get(args.shared_model)
+
+    if training_model_arg in supported_training_models:
+        training_hint = (
+            "Generate them first using training.py, e.g., "
+            f"`python training.py --model {training_model_arg} --dataset {args.dataset} --type {args.type} "
+            f"--unlearning {args.unlearning} --aggregation {aggregation}`"
+        )
+    elif training_model_arg is None:
+        training_hint = (
+            f"Shared model '{args.shared_model}' is not recognized. Supported shared models are: "
+            f"{', '.join(training_model_map.keys())}."
+        )
+    else:
+        training_hint = (
+            f"training.py does not currently support '--model {training_model_arg}'. "
+            f"Supported training models are: {', '.join(sorted(supported_training_models))}."
+        )
+
     raise FileNotFoundError(
         f"Pretrained federated models not found. Expected '{full_model_name}' and '{unlearned_model_name}' inside {expected_dirs}. "
-        "Generate them first using training.py (e.g., `python training.py --model lenet --dataset CIFAR10 --type sample --unlearning retrain --aggregation fedavg`)."
+        + training_hint
     )
 
 print(f"Found existing full model at '{full_model_path}', loading weights...")
