@@ -35,6 +35,29 @@ class LeNet(nn.Module):
         out = self.fc(out)
         return out
 
+
+class LeNet_CIFAR100(nn.Module):
+    def __init__(self, num_classes=100):
+        super(LeNet_CIFAR100, self).__init__()
+        act = nn.Sigmoid
+        self.body = nn.Sequential(
+            nn.Conv2d(3, 12, kernel_size=5, padding=5//2, stride=2),
+            act(),
+            nn.Conv2d(12, 12, kernel_size=5, padding=5//2, stride=2),
+            act(),
+            nn.Conv2d(12, 12, kernel_size=5, padding=5//2, stride=1),
+            act(),
+        )
+        self.fc = nn.Sequential(
+            nn.Linear(768, num_classes)
+        )
+
+    def forward(self, x):
+        out = self.body(x)
+        out = out.view(out.size(0), -1)
+        out = self.fc(out)
+        return out
+
     
 class LeNetMnist(nn.Module):
     def __init__(self, input_channels=1, num_classes=10):
