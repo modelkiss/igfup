@@ -1,3 +1,4 @@
+import os
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -456,11 +457,22 @@ elif args.unlearning == "efficient":
     )
 
     print("approximate Federated Unlearning...")
-    unlearned_net = efficient_federated_unlearning(full_net, forgotten_loader, modified_client_loaders, 
+    unlearned_net = efficient_federated_unlearning(full_net, forgotten_loader, modified_client_loaders,
                             criterion, num_unlearn_rounds=10, num_finetune_rounds=10,
                             unlearn_lr=0.001, finetune_lr=0.001)
-    
 
 
-torch.save(full_net.state_dict(), f"./fgi/federated_weight/{args.model}/{args.dataset}_{args.type}_{args.unlearning}_{args.aggregation}_federated_full_round_20_partial.pth")
-torch.save(unlearned_net.state_dict(), f"./fgi/federated_weight/{args.model}/{args.dataset}_{args.type}_{args.unlearning}_{args.aggregation}_federated_unlearned_round_20_partial.pth")
+
+save_dir = os.path.join("fgi", "federated_weight", str(args.model))
+os.makedirs(save_dir, exist_ok=True)
+full_model_path = os.path.join(
+    save_dir,
+    f"{args.dataset}_{args.type}_{args.unlearning}_{args.aggregation}_federated_full_round_20_partial.pth",
+)
+unlearned_model_path = os.path.join(
+    save_dir,
+    f"{args.dataset}_{args.type}_{args.unlearning}_{args.aggregation}_federated_unlearned_round_20_partial.pth",
+)
+
+torch.save(full_net.state_dict(), full_model_path)
+torch.save(unlearned_net.state_dict(), unlearned_model_path)
